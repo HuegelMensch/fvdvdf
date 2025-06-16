@@ -25,7 +25,7 @@ const OberurselWeatherData = () => {
     avgPAR: 0
   });
 
-  const calculateVPDFromTemp = (temp, humidity) => {
+  const calculateVPDFromTemp = (temp: number, humidity: number) => {
     // Magnus formula for saturation vapor pressure
     const es = 0.6112 * Math.exp((17.67 * temp) / (temp + 243.5));
     // VPD calculation
@@ -33,7 +33,11 @@ const OberurselWeatherData = () => {
     return vpd;
   };
 
-  const estimatePAR = (solarRad, hour = 12) => {
+  interface EstimatePAR {
+    (solarRad: number, hour?: number): number;
+  }
+
+  const estimatePAR: EstimatePAR = (solarRad, hour = 12) => {
     // PAR is approximately 45% of total solar radiation
     const parRatio = 0.45;
     const timeAdjustment = Math.cos((hour - 12) * Math.PI / 12) * 0.3 + 0.7;
@@ -99,13 +103,18 @@ const OberurselWeatherData = () => {
     return data;
   };
 
-  const updateSummaryStats = (data) => {
+  const updateSummaryStats = (data: WeatherRow[]) => {
     const avgTemp = (data.reduce((sum, row) => sum + parseFloat(row.tempAvg), 0) / data.length).toFixed(1);
     const avgHumidity = (data.reduce((sum, row) => sum + parseFloat(row.humidity), 0) / data.length).toFixed(1);
     const avgVPD = (data.reduce((sum, row) => sum + parseFloat(row.vpd), 0) / data.length).toFixed(3);
-    const avgPAR = Math.round(data.reduce((sum, row) => sum + parseFloat(row.par), 0) / data.length);
+    const avgPAR = Math.round(data.reduce((sum, row) => sum + row.par, 0) / data.length);
     
-    setSummaryStats({ avgTemp, avgHumidity, avgVPD, avgPAR });
+    setSummaryStats({ 
+      avgTemp: Number(avgTemp), 
+      avgHumidity: Number(avgHumidity), 
+      avgVPD: Number(avgVPD), 
+      avgPAR 
+    });
   };
 
   const generateData = () => {
